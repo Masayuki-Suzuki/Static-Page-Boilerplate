@@ -1,10 +1,12 @@
-require('babel-polyfill')
+require('@babel/polyfill')
 
 const path = require('path')
 const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const SiteData = require('../assets/siteData')
+
 
 const DEV = !process.argv.includes('--env.prod')
 
@@ -17,7 +19,7 @@ const assetPath = {
   jsMain: '../assets/js/',
 }
 const entry = {
-  [`${publicPath.jsMain}app.js`]: path.join(__dirname, `${assetPath.jsMain}app.js`),
+  [`${publicPath.jsMain}app.js`]: path.join(__dirname, `${assetPath.jsMain}app.ts`),
   [`${publicPath.cssMain}topPage.css`]: path.join(__dirname, `${assetPath.cssMain}style.scss`),
   [`${publicPath.cssMain}vendor/normalize.css`]: path.join(__dirname, `${assetPath.cssMain}vendor/normalize.scss`),
 }
@@ -41,13 +43,14 @@ const plugins = [
 
 if (!DEV) {
   plugins.push(
-    new webpack.optimize.UglifyJsPlugin({ compress: { screw_ie8: false, warnings: false } }),
+    // new webpack.optimize.UglifyJsPlugin({ compress: { screw_ie8: false, warnings: false } }),
     new webpack.optimize.AggressiveMergingPlugin(),
-    new webpack.optimize.DedupePlugin(),
+    // new webpack.optimize.DedupePlugin(),
   )
 }
 
 module.exports = {
+  mode: 'development',
   entry,
   output: {
     path: path.join(__dirname, '../www/'),
@@ -61,6 +64,18 @@ module.exports = {
             test: /\.(js|jsx)?$/,
             exclude: /node_modules/,
             loader: require.resolve('babel-loader'),
+          },
+          {
+            test: /\.ts$/,
+            exclude: /node_modules/,
+            use: [
+              {
+                loader: 'babel-loader'
+              },
+              {
+                loader: 'ts-loader'
+              }
+            ]
           },
           {
             test: /\.(sass|scss)?$/,
@@ -118,8 +133,15 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.eot'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.eot'],
   },
   devtool: DEV ? 'source-map' : false,
   plugins,
+  optimization: {
+    minimizer: [
+      new UglifyJsPlugin({
+        uglifyOptions: { compress: { screw_ie8: false, warnings: false } }
+      })
+    ]
+  }
 }

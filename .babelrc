@@ -1,8 +1,16 @@
 {
   "presets": [
-    "es2015",
-    "es2016",
-    "es2017",
-    "stage-0"
+    ["@babel/preset-env", {
+      "targets": { "browsers": ["last 2 versions", "safari >= 7"] }
+    }],
+    ["@babel/preset-stage-0", {
+      "decoratorsLegacy": true,
+      "pipelineProposal": "minimal"
+    }]
+  ],
+  "plugins": [
+    ["@babel/plugin-proposal-decorators", {
+      "legacy": true
+    }]
   ]
 }
